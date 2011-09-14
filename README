@@ -1,1 +1,28 @@
-Simple demo of some modern Perl techniques - for a Linux Format article.
+This is a simple demonstation of using a database with Perl. It was written
+for a tutorial on Modern Perl in Linux Format issue 151.
+
+* book.sql - SQL to create the ncessary database tables and user
+* Book.pm  - Main database communication module
+* Book/    - Directory containing other database communication modules
+* book     - The command line program itself
+
+The database communication modules were generated automatically using this
+command:
+
+  $ dbicdump -o components='["InflateColumn::DateTime"]' \
+    Book dbi:mysql:database=books books README
+
+The 'book' command is used as follows:
+
+  $ book [list]
+    - Shows all books currently in the database
+
+  $ book add <ISBN>
+    - Adds the given book to the system
+
+  $ book start <ISBN>
+    - Tells the system that you have started reading the given book
+
+  $ book end <ISBN>
+    - Tells the system that you have finished reading the given book
+
