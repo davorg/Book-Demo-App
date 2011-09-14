@@ -9,6 +9,7 @@ use Book;
 use Net::Amazon;
 use DateTime;
 
+# List of valid sub-commands with subroutines to implement them
 my %command = (
   add => \&add,
   list => \&list,
@@ -16,6 +17,7 @@ my %command = (
   end => \&end,
 );
 
+# Default sub-command is 'list'
 my $what = shift || 'list';
 
 if (exists $command{$what}) {
@@ -24,17 +26,20 @@ if (exists $command{$what}) {
   die "Invalid command: $what\n";
 }
 
+# Connect to the database and return a schema object
 sub get_schema {
   return Book->connect('dbi:mysql:database=books', 'books', 'README')
   or die "Cannot connect to database\n";
 }
 
+# List all books in the database
 sub list {
   my $schema = get_schema();
   my $books_rs = $schema->resultset('Book');
   
   say "Reading:\n";
   
+  # Books we're reading have a start date but no end date
   foreach ($books_rs->search({
     started => { '!=', undef },
     ended => undef,
@@ -42,16 +47,18 @@ sub list {
     say ' * ', $_->title, ' (', $_->author->name, ')';
   }
   
+  # Books we're going to read have no start date
   say "\nTo Read:\n";
   
   foreach ($books_rs->search({
-    started => undef
+    started => undef,
   })) {
     say ' * ', $_->title, ' (', $_->author->name, ')';
   }
   
   say "\nRead:\n";
   
+  # Books we've read have an end date
   foreach ($books_rs->search({
     ended => { '!=', undef },
   })) {
@@ -59,12 +66,14 @@ sub list {
   }
 }
 
+# Add a book to the database
 sub add {
   my $isbn = shift || die "No ISBN to add\n";
 
   my $schema = get_schema();
   my $books_rs = $schema->resultset('Book');
-    
+
+  # Don't add the same book twice
   if ($books_rs->search({ isbn => $isbn })->count) {
     warn "ISBN $isbn already exists in db\n";
     return;    
@@ -76,6 +85,7 @@ sub add {
     locale => 'uk',
   ) or die "Cannot connect to Amazon\n";
 
+  # Search for the book at Amazon
   my $resp = $amz->search(asin => $isbn);
   
   unless ($resp->is_success) {
@@ -87,11 +97,13 @@ sub add {
   my $title = $book->ProductName;
   my $author_name = ($book->authors)[0];
   my $imgurl = $book->ImageUrlMedium;
-  
+
+  # Find or create the author
   my $author = $schema->resultset('Author')->find_or_create({
     name => $author_name,
   });
-  
+
+  # Add the book to the author
   $author->add_to_books({
     isbn => $isbn,
     title => $title,
@@ -103,36 +115,44 @@ sub add {
   return;
 }
 
+# Start reading a book
 sub start {
   my $schema = get_schema();
   my $books_rs = $schema->resultset('Book');
 
   my $isbn = shift || die "No ISBN to start\n";
 
+  # Ensure the book is in the database
   my ($book) = $books_rs->search({ isbn => $isbn });
   
   unless ($book) {
+    # N.B. Could call 'add' at this point
     die "ISBN $isbn not found in db\n";
   }
   
+  # Update 'started' column to contain current date/time
   $book->started(DateTime->now);
   $book->update;
   
   say 'Started to read ', $book->title;
 }
 
+# Finish reading a book
 sub end {
   my $schema = get_schema();
   my $books_rs = $schema->resultset('Book');
 
   my $isbn = shift || die "No ISBN to end\n";
 
+  # Ensure the book is in the database
   my ($book) = $books_rs->search({ isbn => $isbn });
   
   unless ($book) {
+    # N.B. Could call 'add' and 'start' at this point
     die "ISBN $isbn not found in db\n";
   }
   
+  # Update 'ended' column to contain current date/time
   $book->ended(DateTime->now);
   $book->update;
   
