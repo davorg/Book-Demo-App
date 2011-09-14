@@ -16,7 +16,7 @@ my %command = (
   end => \&end,
 );
 
-my $what = shift // 'list';
+my $what = shift || 'list';
 
 if (exists $command{$what}) {
   $command{$what}->(@ARGV);
