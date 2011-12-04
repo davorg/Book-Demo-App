@@ -1,0 +1,9 @@
+        <div id="header">
+          <h1>BookWeb</h1>
+          <h2>Login</h2>
+          <form method="POST" action="/login">
+          <p>User: <input /><br />
+          Password: <input type="password" name="user" /><br />
+          <input type="submit" value="Log in" name="pass" />
+          </form>
+        </div>
