@@ -11,6 +11,8 @@
 <div id="page">
     <div id="sidebar">
 <% IF logged %><a href="/logout">Log out</a><% ELSE %><a href="/login">Log in</a><% END %>
+<p><form method="post" action="/search"><p>Search Amazon:
+<input name="search" values="<% search %>" /> <input type="submit" value="Search" /></form></p>
     </div>
 
     <div id="content">

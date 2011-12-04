@@ -3,7 +3,19 @@ use Dancer ':syntax';
 use Dancer::Plugin::DBIC;
 use Dancer::Session;
 
+use Net::Amazon;
+use DateTime;
+
 our $VERSION = '0.1';
+
+my %public_path = map { $_ => 1 } ('/', '/login', '/search');
+
+before sub {
+    if (! session('logged_in') and ! $public_path{request->path_info}) {
+        var requested_path => request->path_info;
+        request->path_info('/login');
+    }
+};
 
 get '/' => sub {
     my $books_rs = schema->resultset('Book');
@@ -69,6 +81,7 @@ get '/add/:isbn' => sub {
     my $amz = Net::Amazon->new(
         token => $ENV{AMAZON_KEY},
         secret_key => $ENV{AMAZON_SECRET},
+        associate_tag => $ENV{AMAZON_ASSTAG},
         locale => 'uk',
     ) or die "Cannot connect to Amazon\n";
 
@@ -99,8 +112,32 @@ get '/add/:isbn' => sub {
     return redirect '/';
 };
 
+post '/search' => sub {
+    my $amz = Net::Amazon->new(
+        token => $ENV{AMAZON_KEY},
+        secret_key => $ENV{AMAZON_SECRET},
+        associate_tag => $ENV{AMAZON_ASSTAG},
+        locale => 'uk',
+    ) or die "Cannot connect to Amazon\n";
+   
+    my $resp = $amz->search(
+        keyword => param('search'),
+        mode => 'books',
+    );
+
+    my %data;
+    $data{search} = param('search');
+    if ($resp->is_success) {
+        $data{books} = [ $resp->properties ];
+    } else {
+        $data{error} = $resp->message;
+    }
+
+    template 'results', \%data;
+};
+
 get '/login' => sub {
-    template 'login';  
+    template 'login', { path => vars->{requested_path } };  
 };
 
 post '/login' => sub {
@@ -108,6 +145,12 @@ post '/login' => sub {
         session 'logged_in' => 1;
     }
 
+    redirect  params->{path} || '/';
+};
+
+get '/logout' => sub {
+    session 'logged_in' => 0;
+    
     redirect '/';
 };
 
