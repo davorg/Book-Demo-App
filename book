@@ -5,6 +5,8 @@ use warnings;
 
 use 5.010;
 
+use lib 'BookWeb/lib';
+
 use Book;
 use Net::Amazon;
 use DateTime;
