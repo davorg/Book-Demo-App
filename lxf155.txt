@@ -348,6 +348,8 @@ Over the course of these three articles, we have created the skeleton of a usefu
 
 * The HTML and CSS I've used have been very basic. They can be improved to make the application look more attractive.
 
+* Currently we show the maintenance links to everyone and only authenticate when someone tries to use them. An alternative approach would be to only display the links if the user is logged in.
+
 * Currently all of the list maintenance actions are full requests to the server. It would be possible to rewrite them to use AJAX so that the user experience is smoother.
 
 * The database contains all the data required to create a web feed of your current reading matter. Perhaps a route at '/feed' which displayed an Atom feed of all books that have been started or finished in the last 24 hours.
