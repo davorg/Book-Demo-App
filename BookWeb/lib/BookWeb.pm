@@ -10,7 +10,7 @@ our $VERSION = '0.1';
 
 my %public_path = map { $_ => 1 } ('/', '/login', '/search');
 
-before sub {
+hook before => sub {
     if (! session('logged_in') and ! $public_path{request->path_info}) {
         var requested_path => request->path_info;
         request->path_info('/login');
@@ -42,10 +42,6 @@ get '/' => sub {
 };
 
 get '/start/:isbn' => sub {
-    if (not session 'logged_in') {
-        redirect '/login';
-    }
-    
     my $books_rs = schema->resultset('Book');
     my $book = $books_rs->find({ isbn => param('isbn')});
 
@@ -57,10 +53,6 @@ get '/start/:isbn' => sub {
 };
 
 get '/end/:isbn' => sub {
-    if (not session 'logged_in') {
-        redirect '/login';
-    }
-
     my $books_rs = schema->resultset('Book');
     my $book = $books_rs->find({ isbn => param('isbn')});
 
@@ -72,18 +64,9 @@ get '/end/:isbn' => sub {
 };
 
 get '/add/:isbn' => sub {
-    if (not session 'logged_in') {
-        redirect '/login';
-    }
-
     my $author_rs = schema->resultset('Author');
 
-    my $amz = Net::Amazon->new(
-        token => $ENV{AMAZON_KEY},
-        secret_key => $ENV{AMAZON_SECRET},
-        associate_tag => $ENV{AMAZON_ASSTAG},
-        locale => 'uk',
-    ) or die "Cannot connect to Amazon\n";
+    my $amz = get_amazon();
 
     # Search for the book at Amazon
     my $resp = $amz->search(asin => param('isbn'));
@@ -113,12 +96,7 @@ get '/add/:isbn' => sub {
 };
 
 post '/search' => sub {
-    my $amz = Net::Amazon->new(
-        token => $ENV{AMAZON_KEY},
-        secret_key => $ENV{AMAZON_SECRET},
-        associate_tag => $ENV{AMAZON_ASSTAG},
-        locale => 'uk',
-    ) or die "Cannot connect to Amazon\n";
+    my $amz = get_amazon();
    
     my $resp = $amz->search(
         keyword => param('search'),
@@ -141,7 +119,7 @@ get '/login' => sub {
 };
 
 post '/login' => sub {
-    if (params->{user} eq 'dave' && params->{pass} eq 'letmein') {
+    if (params->{user} eq 'reader' && params->{pass} eq 'letmein') {
         session 'logged_in' => 1;
     }
 
@@ -153,5 +131,15 @@ get '/logout' => sub {
     
     redirect '/';
 };
+
+sub get_amazon {
+     return Net::Amazon->new(
+        token => $ENV{AMAZON_KEY},
+        secret_key => $ENV{AMAZON_SECRET},
+        associate_tag => $ENV{AMAZON_ASSTAG},
+        locale => 'uk',
+    ) or die "Cannot connect to Amazon\n";
+}
+
 
 true;
