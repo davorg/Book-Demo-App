@@ -10,6 +10,18 @@ Part 3: The power of web frameworks is how they take care of the standard featur
 Dave Cross has been involved with the Perl community since the last millennium. In 1998 he started the London Perl Mongers, the first European Perl users group.
 ///END OUR EXPERT BOX///
 
+///QUICK TIP///
+The best book about Perl is called "Programming Perl". The fourth edition has just been published.
+///END QUICK TIP///
+
+///QUICK TIP///
+There are a huge number of blogs dedicated to Perl programming. Many of the best ones are collected at http://mgnm.at/ironman.
+///END QUICK TIP///
+
+///QUICK TIP///
+New major versions of Perl are released annually. The current version is 5.14. Version 5.16 will be released in the spring.
+///END QUICK TIP///
+
 ///BODY COPY///
 
 In our previous article, we added a web front end to our reading list program. But this interface only displayed the contents of our database, we still needed to use the command line program to change the data. In this article, we'll fix that by adding interactivity to our web application. By the end of this article you won't need the command line program at all.
@@ -137,6 +149,12 @@ Our additions are towards the end. If the book has a value in the start date but
 
 If we make these changes and start our application (with 'bin/app.pl'), you should see these links appearing next to the books - assuming that you have books on the list. And that brings us neatly to the next problem. We need a better way to add books to the list. Let's do it by searching Amazon.
 
+///PIC///
+hunger_links.png
+
+///CAPTION///
+The books application with links allowing you maintain your reading list.
+
 ///CROSSHEAD///
 Amazon Exploration
 
@@ -201,6 +219,12 @@ Which means we need to create a template called views/results.tt. It looks like 
 ///END CODE///
 
 There's a bit of code there for displaying an error if the search failed and for displaying a "no results" message, but most of the code is used to display a list of books that are returned from Amazon. For each book in the list we display the title, the author and a link to add the book to our reading list.
+
+///PIC///
+search.png
+
+///CAPTION///
+The search results page. Amazon seems to have a rather liberal definition of "perl".
 
 If you save these changes and restart the application, you should find that you have a fully function web site that now allows you to do anything that our original command line program did. You can add new books to the list and tell the system when you start and finish a book. The only problem is that anyone else can do all of that too.
 
@@ -279,6 +303,12 @@ Password: <input type="password" name="pass" /><br />
 ///END CODE///
 
 That's all standard stuff. The important thing is that the form method is POST, which means that when it is submitted the second login route is triggered. That checks that the username and password are correct and if they are it redirects the user to the path that they originally requested. Of course, in a real application you wouldn't have the username and password hard-coded into your program.
+
+///PIC///
+login.png
+
+///CAPTION///
+The login page looks rather basic, but it gets the job done.
 
 There's just one more thing to add. If you can log in to an application then it's nice to be able to log out. That's handled with a really simple route.
 
