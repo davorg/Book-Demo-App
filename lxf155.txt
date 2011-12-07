@@ -2,7 +2,7 @@
 Modern Perl: Adding to Our Web Application
 
 ///STANDFIRST///
-Part 3: The power of web frameworks is how they take care of the standard features you need. In this article Dave Cross adds interactivity to his reading list program.
+Part 3: The power of web frameworks is how they take care of the standard features you need. In this article Dave Cross uses Dancer to add interactivity to his reading list program.
 
 ///ON THE DVD LOGO///
 
@@ -63,7 +63,8 @@ Once we have updated the book record, we just use Dancer's 'redirect' function t
 
 The code for the 'end' route is almost identical. Only the path and the database column will differ. The path will be '/end/:isbn' and we'll need to update the 'ended' column in the database.
 
-///Adding new books///
+///CROSSHEAD///
+Adding new books
 
 The next thing we need to do is to add new books to the list. Again, we'll be repurposing code from the original command line program. As we need to go to Amazon for details of the book, we need to create a Net::Amazon object. We'll need this object in a couple of places, so we'll write a 'get_amazon()' subroutine that creates the object for us.
 
@@ -284,7 +285,7 @@ post '/login' => sub {
 
 ///END CODE///
 
-This is a nice illustration of the power of Dancer routes. We have two routes with the same path but with different HTTP request types. If we make a GET request to /login then the first route is triggered. If we make a POST request to the same path then the second route fires. The before route makes a GET request, so the first route runs. That displays the login template, passing it the original requested path. Here's that template, which lives in views/login.tt:
+This is a nice illustration of the power of Dancer routes. We have two routes with the same path but with different HTTP request types. If we make a GET request to /login then the first route is triggered. If we make a POST request to the same path then the second route fires. The before hook makes a GET request, so the first route runs. That displays the login template, passing it the original requested path. Here's that template, which lives in views/login.tt:
 
 ///CODE///
 
@@ -302,7 +303,7 @@ Password: <input type="password" name="pass" /><br />
 
 ///END CODE///
 
-That's all standard stuff. The important thing is that the form method is POST, which means that when it is submitted the second login route is triggered. That checks that the username and password are correct and if they are it redirects the user to the path that they originally requested. Of course, in a real application you wouldn't have the username and password hard-coded into your program.
+That's all standard stuff. Notice that we've stored the original path in a hidden input on the form. The important thing is that the form method is POST, which means that when it is submitted the second login route is triggered. That checks that the username and password are correct and if they are it redirects the user to the path that they originally requested. Of course, in a real application you wouldn't have the username and password hard-coded into your program.
 
 ///PIC///
 login.png
@@ -333,7 +334,7 @@ All this does is to set the logged in flag to false and then redirects the user 
 
 That has two purposes. If the user is not logged in, then it displays a login link. And when the user is logged in it displays a log out link.
 
-And that is our application complete. If you run the app once last time you'll see that anyone can see your reading list but that if you try to do anything to change the contents of the list you are asked to log in. There are, of course, many other improvements that can be made to the application. I make some suggestions in the boxout on this page.
+And that is our application complete. If you run the app one last time you'll see that anyone can see your reading list but that if you try to do anything to change the contents of the list you are asked to log in. There are, of course, many other improvements that can be made to the application. I make some suggestions in the boxout on this page.
 
 I hope you find this application useful. And I hope that you see how the Modern Perl tools that you can find on CPAN make it easy to write really quite complex applications.
 
